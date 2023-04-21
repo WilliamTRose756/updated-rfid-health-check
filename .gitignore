@@ -1,0 +1,7 @@
+env/
+pymongo/
+pymongo-4.3.3.dist-info/
+gridfs/
+dnspython-2.3.0.dist-info/
+dns/
+bson/
