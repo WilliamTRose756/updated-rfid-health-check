@@ -54,11 +54,14 @@ class SESEmail:
             msg['Subject'] = subject
             msg.attach(MIMEText(body, 'plain'))
 
-            with smtplib.SMTP(self.smtp_server, self.port) as server:
-                server.starttls()
-                server.login(self.smtp_username, self.smtp_password)
-                server.sendmail(self.from_email, recipient, msg.as_string())
-                print('Email Sent')
+            try:
+                with smtplib.SMTP(self.smtp_server, self.port) as server:
+                    server.starttls()
+                    server.login(self.smtp_username, self.smtp_password)
+                    server.sendmail(self.from_email, recipient, msg.as_string())
+                    print('Email Sent')
+            except ConnectionRefusedError:
+                print("Failed to connect to the SMTP server. Please check the server address and port.")
         except Exception as e:
             print(f"Failed to send the email due to an error: {e}")
     
