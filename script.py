@@ -27,6 +27,7 @@ class ReaderCheck:
             profiles_collection = self.client.test.profiles # This line targets the actual collection, update accordingly
             offline_devices = list(profiles_collection.find({'status': 'inactive'}))
             if offline_devices:
+                print('There are devices offline')
                 return offline_devices
             else:
                 print('There are no offline devices for this collection')
@@ -57,6 +58,7 @@ class SESEmail:
                 server.starttls()
                 server.login(self.smtp_username, self.smtp_password)
                 server.sendmail(self.from_email, recipient, msg.as_string())
+                print('Email Sent')
         except Exception as e:
             print(f"Failed to send the email due to an error: {e}")
     
@@ -79,11 +81,15 @@ def lambda_handler(event, context):
     device_handler = ReaderCheck(CONNECTION_STRING)
     offline_devices = device_handler.get_offline_devices()
 
-    SUBJECT = 'Offline Devices Report'
+   # If there are offline devices, generate email body and send email
+    if offline_devices:
+        SUBJECT = 'Offline Devices Report'
 
-    # Generate email body
-    EMAIL_BODY = generate_email_body(offline_devices)
+        # Generate email body
+        EMAIL_BODY = generate_email_body(offline_devices)
 
-    # Send email with offline devices
-    email_sender = SESEmail(SMTP_SERVER, PORT, SMTP_USERNAME, SMTP_PASSWORD, SENDER_EMAIL)
-    email_sender.send_email(RECIPIENT_EMAIL, SUBJECT, EMAIL_BODY)
+        # Send email with offline devices
+        email_sender = SESEmail(SMTP_SERVER, PORT, SMTP_USERNAME, SMTP_PASSWORD, SENDER_EMAIL)
+        email_sender.send_email(RECIPIENT_EMAIL, SUBJECT, EMAIL_BODY)
+    else:
+        print("No offline devices found. No email will be sent.")
